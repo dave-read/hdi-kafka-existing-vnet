@@ -7,4 +7,6 @@
 - Move some hard-coded values to parameters
 - There is a vnet template in the project that can be used to create a ```test``` vnet
 
-[![Deploy to Azure](https://azuredeploy.net/deploybutton.svg)](https://azuredeploy.net/)
+<a href="https://azuredeploy.net/?repository=https://github.com/dave-read/hdi-kafka-existing-vnet/arm-templates" target="_blank">
+    <img src="http://azuredeploy.net/deploybutton.png"/>
+</a>
