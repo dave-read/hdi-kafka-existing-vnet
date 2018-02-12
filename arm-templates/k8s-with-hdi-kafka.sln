@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27004.2002
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{151D2E53-A2C4-4D7D-83FE-D05416EBD58E}") = "k8s-with-hdi-kafka", "k8s-with-hdi-kafka.deployproj", "{815B55CB-AAE3-483B-A35B-5524C58AE97E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{815B55CB-AAE3-483B-A35B-5524C58AE97E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{815B55CB-AAE3-483B-A35B-5524C58AE97E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{815B55CB-AAE3-483B-A35B-5524C58AE97E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{815B55CB-AAE3-483B-A35B-5524C58AE97E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {543284DD-9178-4700-ABF4-F84801F0FA62}
+	EndGlobalSection
+EndGlobal

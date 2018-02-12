@@ -1,0 +1,247 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json#",
+  "contentVersion": "0.9.0.0",
+  "parameters": {
+
+    "clusterName": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the HDInsight cluster to create."
+      }
+    },
+    "clusterLoginUserName": {
+      "type": "securestring",
+      "metadata": {
+        "description": "These credentials can be used to submit jobs to the cluster and to log into cluster dashboards."
+      }
+    },
+    "clusterLoginPassword": {
+      "type": "securestring",
+      "metadata": {
+        "description": "The password must be at least 10 characters in length and must contain at least one digit, one non-alphanumeric character, and one upper or lower case letter."
+      }
+    },
+    "clusterVersion": {
+      "type": "string",
+      "defaultValue": "3.6",
+      "metadata": {
+        "description": "HDInsight cluster version."
+      }
+    },
+    "clusterKind": {
+      "type": "string",
+      "defaultValue": "KAFKA",
+      "metadata": {
+        "description": "The type of the HDInsight cluster to create."
+      }
+    },
+    "sshUserName": {
+      "type": "securestring",
+      "metadata": {
+        "description": "These credentials can be used to remotely access the cluster."
+      }
+    },
+    "sshPublicKey": {
+      "type": "securestring"
+    },
+    "vnetResourceGroup": {
+      "type": "string"
+    },
+    "vnetName": {
+      "type": "string"
+    },
+    "subnetName": {
+      "type": "string"
+    },
+    "headNodeVmSize": {
+      "type": "string",
+      "defaultValue": "Standard_D3_V2"
+    },
+    "headNodeMinInstanceCount": {
+      "type": "int",
+      "defaultValue": 1
+    },
+    "headNodeTargetInstanceCount": {
+      "type": "int",
+      "defaultValue": 2
+    },
+
+
+    "clusterWorkerNodeCount": {
+      "type": "int",
+      "defaultValue": 3,
+      "metadata": {
+        "description": "The number of nodes in the HDInsight cluster."
+      }
+    },
+    "workerNodeVmSize": {
+      "type": "string",
+      "defaultValue": "Standard_D3_V2"
+    },
+    "workerNodeMinInstanceCount": {
+      "type": "int",
+      "defaultValue": 1
+    },
+    "workerNodeTargetInstanceCount": {
+      "type": "int",
+      "defaultValue": 4
+    },
+    "workerNodeDiskPerNode": {
+      "type": "int",
+      "defaultValue": 2
+    },
+
+
+    "zookeeperNodeVmSize": {
+      "type": "string",
+      "defaultValue": "Large"
+    },
+    "zookeeperMinInstanceCount": {
+      "type": "int",
+      "defaultValue": 1
+    },
+    "zookeeperTargetInstanceCount": {
+      "type": "int",
+      "defaultValue": 3
+    },
+
+    "storageAccountContainerName": {
+      "type": "string",
+      "defaultValue": "k8s-with-hdi-kafka"
+    }
+  },
+  "variables": {
+    "storageAccountName": "[concat('hdi',uniqueString(resourceGroup().id))]",
+    "vnetID": "[resourceId(parameters('vnetResourceGroup'),'Microsoft.Network/virtualNetworks',parameters('vnetName'))]",
+    "subnetID": "[concat(variables('vnetID'),'/subnets/',parameters('subnetName'))]"
+  },
+  "resources": [
+    {
+      "apiVersion": "2015-03-01-preview",
+      "name": "[parameters('clusterName')]",
+      "type": "Microsoft.HDInsight/clusters",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[concat('Microsoft.Storage/storageAccounts/',variables('storageAccountName'))]"
+      ],
+      "properties": {
+        "clusterVersion": "[parameters('clusterVersion')]",
+        "osType": "Linux",
+        "tier": "standard",
+        "clusterDefinition": {
+          "kind": "[parameters('clusterKind')]",
+          "configurations": {
+            "gateway": {
+              "restAuthCredential.isEnabled": true,
+              "restAuthCredential.username": "[parameters('clusterLoginUserName')]",
+              "restAuthCredential.password": "[parameters('clusterLoginPassword')]"
+            }
+          }
+        },
+        "storageProfile": {
+          "storageaccounts": [
+            {
+              "name": "[concat(variables('storageAccountName'),'.blob.core.windows.net')]",
+              "isDefault": true,
+              "container": "[parameters('storageAccountContainerName')]",
+              "key": "[listKeys(concat('Microsoft.Storage/storageAccounts/',variables('storageAccountName')), '2015-05-01-preview').key1]"
+            }
+          ]
+        },
+        "computeProfile": {
+          "roles": [
+            {
+              "name": "headnode",
+              "minInstanceCount": "[parameters('headNodeMinInstanceCount')]",
+              "targetInstanceCount": "[parameters('headNodeTargetInstanceCount')]",
+              "hardwareProfile": {
+                "vmSize": "[parameters('headNodeVmSize')]"
+              },
+              "osProfile": {
+                "linuxOperatingSystemProfile": {
+                  "username": "[parameters('sshUserName')]",
+                  "sshProfile": {
+                    "publicKeys": [
+                      {
+                        "certificateData": "[parameters('sshPublicKey')]"
+                      }
+                    ]
+                  }
+                }
+              },
+              "virtualNetworkProfile": {
+                "id": "[variables('vnetID')]",
+                "subnet": "[variables('subnetID')]"
+              },
+              "scriptActions": []
+            },
+            {
+              "name": "workernode",
+              "minInstanceCount": "[parameters('workerNodeMinInstanceCount')]",
+              "targetInstanceCount": "[parameters('workerNodeTargetInstanceCount')]",
+              "hardwareProfile": {
+                "vmSize": "[parameters('workerNodeVmSize')]"
+              },
+              "osProfile": {
+                "linuxOperatingSystemProfile": {
+                  "username": "[parameters('sshUserName')]",
+                  "sshProfile": {
+                    "publicKeys": [
+                      {
+                        "certificateData": "[parameters('sshPublicKey')]"
+                      }
+                    ]
+                  }
+                }
+              },
+              "virtualNetworkProfile": {
+                "id": "[variables('vnetID')]",
+                "subnet": "[variables('subnetID')]"
+              },
+              "scriptActions": [],
+              "dataDisksGroups": [
+                {
+                  "disksPerNode": "[parameters('workerNodeDiskPerNode')]"
+                }
+              ]
+            },
+            {
+              "name": "zookeepernode",
+              "minInstanceCount": "[parameters('zookeeperMinInstanceCount')]",
+              "targetInstanceCount": "[parameters('zookeeperTargetInstanceCount')]",
+              "hardwareProfile": {
+                "vmSize": "[parameters('zookeeperNodeVmSize')]"
+              },
+              "osProfile": {
+                "linuxOperatingSystemProfile": {
+                  "username": "[parameters('sshUserName')]",
+                  "sshProfile": {
+                    "publicKeys": [
+                      {
+                        "certificateData": "[parameters('sshPublicKey')]"
+                      }
+                    ]
+                  }
+                }
+              },
+              "virtualNetworkProfile": {
+                "id": "[variables('vnetID')]",
+                "subnet": "[variables('subnetID')]"
+              },
+              "scriptActions": []
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "name": "[variables('storageAccountName')]",
+      "apiVersion": "2015-05-01-preview",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "accountType": "Standard_LRS"
+      }
+    }
+  ]
+}

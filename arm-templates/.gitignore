@@ -1,0 +1,8 @@
+
+*-parameter*.json
+_output
+.vs
+*.out
+*.txt
+/bin
+/obj
