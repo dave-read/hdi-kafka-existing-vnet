@@ -33,7 +33,6 @@
     <Content Include="Deploy-AzureResourceGroup.ps1" />
     <Content Include="hdi-parameters.json" />
     <Content Include="hdi-template.json" />
-    <None Include="resources.txt" />
   </ItemGroup>
   <Target Name="GetReferenceAssemblyPaths" />
 </Project>
